@@ -93,7 +93,7 @@ border-bottom-left-radius:10px;
       <rect>
        <x>30</x>
        <y>16</y>
-       <width>371</width>
+       <width>491</width>
        <height>61</height>
       </rect>
      </property>
@@ -111,7 +111,7 @@ border-bottom-left-radius:10px;
 color: white</string>
      </property>
      <property name="text">
-      <string>Rezerwacja samochodów</string>
+      <string>Wypożyczalnia samochodów</string>
      </property>
     </widget>
    </widget>

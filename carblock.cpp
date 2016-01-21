@@ -1,33 +1,16 @@
 #include "carblock.h"
 #include "ui_carblock.h"
 
-CarBlock::CarBlock(int id, QString name, QString model, QString licensePlate, QDate inspectionDate, QDate insuranceDate, int mileage, QString notes, Status status, QString photoPath, bool toAdd, QWidget *parent) :
+CarBlock::CarBlock(int id, QString name, QString model, QString licensePlate, int mileage, Status status, QString photoPath,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CarBlock),
     idCar(id)
 {
     ui->setupUi(this);
 
-    isAddBlock = toAdd;
-    if(isAddBlock){
-        ui->btnReserve->setVisible(false);
-        ui->btnAddInspection->setVisible(false);
-        ui->btnAddInsurance->setVisible(false);
-        ui->lblStatus->setVisible(false);
-        ui->lblMileage->setReadOnly(false);
-        ui->lblCarName->setReadOnly(false);
-        ui->lblLicensePlate->setReadOnly(false);
-        ui->btnAddImage->setVisible(true);
-        ui->btnRemove->setIcon(QIcon(":/images/images/add.png"));
-    }
-
     ui->lblLicensePlate->setText(licensePlate);
     ui->lblPhoto->setPixmap(QPixmap(photoPath));
     ui->lblCarName->setText(name + QString(" ") + model);
-    ui->lblMileage->setText(QString::number(mileage) + " km");
-    ui->dateEditInspection->setDate(inspectionDate);
-    ui->dateEditInsurance->setDate(insuranceDate);
-    carNotes = notes;
     setStatus(status);
 }
 
@@ -42,115 +25,77 @@ void CarBlock::setStatus(Status status)
         ui->lblStatus->setPixmap(QPixmap(":/images/images/free.png"));
     if(status == Status::Rented)
         ui->lblStatus->setPixmap(QPixmap(":/images/images/rented.png"));
+    setRentButton(status);
+    carStatus = status;
 }
 
-void CarBlock::setAdminPermissions(bool isAdmin)
+void CarBlock::setRentButton(Status status)
 {
-    if(!isAdmin) {
-        ui->lblInspectionImage->setVisible(false);
-        ui->lblInsuranceImage->setVisible(false);
-        ui->lblNotesImage->setVisible(false);
-        ui->dateEditInspection->setVisible(false);
-        ui->dateEditInsurance->setVisible(false);
-        ui->btnAddInspection->setVisible(false);
-        ui->btnAddInsurance->setVisible(false);
-        ui->btnViewNotes->setVisible(false);
-        ui->btnRemove->setVisible(false);
-        ui->btnAddImage->setVisible(false);
+    if(status == Status::Free) {
+        ui->btnRent->setStyleSheet("QPushButton:hover { border-radius: 5px;"
+                                   "background: rgb(0,190,0);}"
+                                   "QPushButton{ color: white; border-radius: 5px;"
+                                   "background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+                                   "stop: 0 rgba(0,190,0), stop: 0.7 rgb(0,150,0));}"
+                                   "QPushButton:pressed { color: white; border-radius: 5px;"
+                                   "background: rgb(0,150,0);}"
+                                    );
+        ui->btnRent->setText("Wypożycz");
     }
-    else {
-        ui->lblInspectionImage->setVisible(true);
-        ui->lblInsuranceImage->setVisible(true);
-        ui->lblNotesImage->setVisible(true);
-        ui->dateEditInspection->setVisible(true);
-        ui->dateEditInsurance->setVisible(true);
-        ui->btnAddInspection->setVisible(true);
-        ui->btnAddInsurance->setVisible(true);
-        ui->btnViewNotes->setVisible(true);
-        ui->btnRemove->setVisible(true);
-        ui->btnAddImage->setVisible(false);
+
+    else if(status == Status::Rented) {
+        ui->btnRent->setStyleSheet("QPushButton:hover { border-radius: 5px;"
+                                   "background: rgb(240,0,0);}"
+                                   "QPushButton{ color: white; border-radius: 5px;"
+                                   "background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+                                   "stop: 0 rgba(240,0,0), stop: 0.7 rgb(210,0,0));}"
+                                   "QPushButton:pressed { color: white; border-radius: 5px;"
+                                   "background: rgb(210,0,0);}"
+                                    );
+        ui->btnRent->setText("Oddaj");
     }
+
 }
 
-void CarBlock::on_btnReserve_clicked()
-{
-    bookingDialog = new BookingDialog(bookingTable, idCar);
-    bookingDialog->exec();
-    delete bookingDialog;
-}
-
-void CarBlock::on_btnAddInsurance_clicked()
-{
-    QSqlQuery qry;
-    qry.prepare("UPDATE car SET InsuranceDate=:_insuranceDate WHERE idCar=:_id");
-    qry.bindValue(":_id", idCar);
-    qry.bindValue(":_insuranceDate", ui->dateEditInsurance->date());
-    if( !qry.exec() )
-        QMessageBox::warning(this,"Informacja","Aktualizacja nie powidoła się./nERROR: "+qry.lastError().text()+"");
-    else {
-        QMessageBox::information(this,"Informacja","Zaktualizowano!");
+void CarBlock::on_btnRent_clicked()
+{ 
+    // check status
+    Status checkedStatus;
+    QSqlQuery qry("SELECT Status FROM car");
+    uint i=1;
+    while(qry.next()) {
+        if(i==idCar)
+            checkedStatus = static_cast<CarBlock::Status>(qry.value(0).toInt());
+        i++;
     }
-}
 
-void CarBlock::on_btnAddInspection_clicked()
-{
-    QSqlQuery qry;
-    qry.prepare("UPDATE car SET InspectionDate=:_inspectionDate WHERE idCar=:_id");
-    qry.bindValue(":_id", idCar);
-    qry.bindValue(":_inspectionDate", ui->dateEditInspection->date());
-    if( !qry.exec() )
-        QMessageBox::warning(this,"Informacja","Aktualizacja nie powidoła się./nERROR: "+qry.lastError().text()+"");
-    else {
-        QMessageBox::information(this,"Informacja","Zaktualizowano!");
-    }
-}
-
-void CarBlock::on_btnRemove_clicked()
-{
-    if(!isAddBlock) {
-        QSqlQuery qry;
-        qry.prepare("DELETE FROM car WHERE idCar=:_id");
-        qry.bindValue(":_id", idCar);
-        if( !qry.exec() )
-            QMessageBox::warning(this,"Informacja","Usuwanie nie powidoła się./nERROR: "+qry.lastError().text()+"");
-        else {
-            QMessageBox::information(this,"Informacja","Usunieto!");
-            emit carDeleted();
+    if(!(checkedStatus != carStatus)) {
+        if(carStatus == Status::Free) {
+            qry.prepare("UPDATE car SET Status=:_Status WHERE idCar=:_id");
+            qry.bindValue(":_id", idCar);
+            qry.bindValue(":_Status", 1);
+            if( !qry.exec() )
+                QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się.");
+            else {
+                QMessageBox::information(this,"Informacja","Wypożyczono!");\
+                emit statusChanged();
+            }
+        }
+        else if(carStatus == Status::Rented) {
+            qry.prepare("UPDATE car SET Status=:_Status WHERE idCar=:_id");
+            qry.bindValue(":_id", idCar);
+            qry.bindValue(":_Status", 0);
+            if( !qry.exec() )
+                QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się.");
+            else {
+                QMessageBox::information(this,"Informacja","Oddano!");
+                emit statusChanged();
+            }
         }
     }
-
     else {
-        QSqlQuery qry;
-        qry.prepare("INSERT INTO car(Brand,Model,LicensePlate,InspectionDate,"
-                                    "InsuranceDate,Mileage,Status,PhotoPath)"
-                     "VALUES(:_Brand,:_Model,:_LicensePlate,:_InspectionDate,"
-                     ":_InsuranceDate,:_Mileage,:_Status,:_PhotoPath)");
-
-        qry.bindValue(":_Brand", ui->lblCarName->text().split(" ").at(0));
-        qry.bindValue(":_Model", ui->lblCarName->text().split(" ").at(1));
-        qry.bindValue(":_LicensePlate", ui->lblLicensePlate->text());
-        qry.bindValue(":_InspectionDate",ui->dateEditInspection->date());
-        qry.bindValue(":_InsuranceDate",ui->dateEditInsurance->date());
-        qry.bindValue(":_Status",0);
-        qry.bindValue(":_Mileage", ui->lblMileage->text());
-        qry.bindValue(":_PhotoPath",addedCarImagePath);
-        if( !qry.exec() )
-            QMessageBox::warning(this,"Informacja","Dodawanie nie powidoła się./nERROR "+qry.lastError().text()+"");
-        else {
-            QMessageBox::information(this,"Informacja","Dodano!");
-            emit carAdded();
-        }
+        QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się.");
+        emit statusChanged();
     }
-}
 
-void CarBlock::on_btnViewNotes_clicked()
-{
-}
-
-void CarBlock::on_btnAddImage_clicked()
-{
-    addedCarImagePath = QFileDialog::getOpenFileName(this, tr("Plik z obrazkiem"),
-                               QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)+"/bez_tytułu.pdf",
-                               tr("Pliki PNG (*.png)"));
-    ui->lblPhoto->setPixmap(QPixmap(addedCarImagePath));
 }

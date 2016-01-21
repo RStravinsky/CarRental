@@ -38,22 +38,15 @@ void MainWindow::updateView()
     for(int i = 0; i < carTable->rowCount(); ++i) {
         carBlockVector.emplace_back(std::move(new CarBlock(carTable->data(carTable->index(i,0)).toInt(),
                                                            carTable->data(carTable->index(i,1)).toString(), carTable->data(carTable->index(i,2)).toString(),
-                                                           carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,4)).toDate(),
-                                                           carTable->data(carTable->index(i,5)).toDate(), carTable->data(carTable->index(i,6)).toInt(),
-                                                           carTable->data(carTable->index(i,7)).toString(), static_cast<CarBlock::Status>(carTable->data(carTable->index(i,8)).toInt()),
+                                                           carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,6)).toInt(),
+                                                           static_cast<CarBlock::Status>(carTable->data(carTable->index(i,8)).toInt()),
                                                            carTable->data(carTable->index(i,9)).toString()
                                                           )
                                               ));
        lastCarBlock = carBlockVector.back();
        lastCarBlock->setBookingTable(bookingTable);
-       lastCarBlock->setAdminPermissions(true);
-       connect(carBlockVector[i],SIGNAL(carDeleted()),this,SLOT(updateView()));
+       connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()));
     }
-    carBlockVector.emplace_back(std::move(new CarBlock(0,QString("-----"),QString("-----"),QString("------"),
-                                                       QDate::currentDate(),QDate::currentDate(),
-                                                       0,QString("-----"),CarBlock::Rented,QString(":/images/images/car.png"),true)));
-    connect(carBlockVector.back(),SIGNAL(carAdded()),this,SLOT(updateView()));
-
 
     scrollWidget = new QWidget(ui->scrollArea);
     scrollLayout = new QVBoxLayout(scrollWidget);
