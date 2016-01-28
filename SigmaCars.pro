@@ -12,22 +12,23 @@ TARGET = SigmaCars
 TEMPLATE = app
 CONFIG += c++11
 RC_ICON = icon.ico
+CONFIG += debug
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     carblock.cpp \
-    bookingdialog.cpp \
-    bookingblock.cpp
+    namedialog.cpp \
+    returndialog.cpp
 
 HEADERS  += mainwindow.h \
     carblock.h \
-    bookingdialog.h \
-    bookingblock.h
+    namedialog.h \
+    returndialog.h
 
 FORMS    += mainwindow.ui \
     carblock.ui \
-    bookingdialog.ui \
-    bookingblock.ui
+    namedialog.ui \
+    returndialog.ui
 
 RESOURCES += \
     resources.qrc

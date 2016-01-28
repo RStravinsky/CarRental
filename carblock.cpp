@@ -11,6 +11,7 @@ CarBlock::CarBlock(int id, QString name, QString model, QString licensePlate, in
     ui->lblLicensePlate->setText(licensePlate);
     ui->lblPhoto->setPixmap(QPixmap(photoPath));
     ui->lblCarName->setText(name + QString(" ") + model);
+    ui->lblMileage->setText(QString::number(mileage) + " km");
     setStatus(status);
 }
 
@@ -57,45 +58,133 @@ void CarBlock::setRentButton(Status status)
 
 }
 
-void CarBlock::on_btnRent_clicked()
-{ 
-    // check status
+bool CarBlock::checkStatus()
+{
     Status checkedStatus;
     QSqlQuery qry("SELECT Status FROM car");
-    uint i=1;
+    int i=1;
     while(qry.next()) {
         if(i==idCar)
             checkedStatus = static_cast<CarBlock::Status>(qry.value(0).toInt());
         i++;
     }
 
-    if(!(checkedStatus != carStatus)) {
-        if(carStatus == Status::Free) {
-            qry.prepare("UPDATE car SET Status=:_Status WHERE idCar=:_id");
-            qry.bindValue(":_id", idCar);
-            qry.bindValue(":_Status", 1);
-            if( !qry.exec() )
-                QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się.");
-            else {
-                QMessageBox::information(this,"Informacja","Wypożyczono!");\
-                emit statusChanged();
+    if(!(checkedStatus != carStatus))
+        return false;
+    else
+        return true;
+}
+
+bool CarBlock::addToHistory(QString name, QString surname)
+{
+    QSqlQuery qry;
+    qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar) "
+                "VALUES (:_Name, :_Surname, :_Begin, :_idCar);"
+                "UPDATE car SET Status=:_Status WHERE idCar=:_idCar");
+    qry.bindValue(":_Name", name);
+    qry.bindValue(":_Surname", surname);
+    qry.bindValue(":_Begin", QDateTime::currentDateTime());
+    qry.bindValue(":_Status", 1);
+    qry.bindValue(":_idCar", idCar);
+    if( !qry.exec() )
+        return false;
+
+    return true;
+}
+
+bool CarBlock::updateHistory(QString mileage, QString notes)
+{
+    QSqlQuery qry;
+    QString name, surname;
+
+    if(notes.isEmpty()) {
+        qry.prepare("UPDATE history SET End=:_End WHERE idCar=:_idCar;"
+                    "UPDATE car SET Mileage=:_Mileage WHERE idCar=:_idCar;"
+                    "UPDATE car SET Status=:_Status WHERE idCar=:_idCar");
+        qry.bindValue(":_idCar", idCar);
+        qry.bindValue(":_End", QDateTime::currentDateTime());
+        qry.bindValue(":_Mileage", mileage);
+        qry.bindValue(":_Status", 0);
+    }
+    else {
+        QSqlQueryModel * historyTable = new QSqlQueryModel(this);
+        historyTable->setQuery("SELECT * FROM history;");
+        for(int i=0; i<historyTable->rowCount(); ++i){
+            if(historyTable->data(historyTable->index(i,5)).toInt() == idCar &&
+               historyTable->data(historyTable->index(i,4)).toString().isEmpty()){
+                name = historyTable->data(historyTable->index(i,1)).toString();
+                surname = historyTable->data(historyTable->index(i,2)).toString();
             }
+
+        }
+
+        qry.prepare("INSERT INTO notes (Contents, Name, Surname, Datetime, isRead, idCar) "
+                    "VALUES (:_Contents, :_Name, :_Surname, :_Datetime, :_isRead, :_idCar);"
+                    "UPDATE history SET End=:_End WHERE idCar=:_idCar;"
+                    "UPDATE car SET Mileage=:_Mileage WHERE idCar=:_idCar;"
+                    "UPDATE car SET Status=:_Status WHERE idCar=:_idCar;");
+        qry.bindValue(":_Contents", notes);
+        qry.bindValue(":_Name", name);
+        qry.bindValue(":_Surname", surname);
+        qry.bindValue(":_Datetime", QDateTime::currentDateTime());
+        qry.bindValue(":_isRead", 0);
+        qry.bindValue(":_idCar", idCar);
+        qry.bindValue(":_End", QDateTime::currentDateTime());
+        qry.bindValue(":_Mileage", mileage);
+        qry.bindValue(":_Status", 0);
+    }
+    if( !qry.exec() ){
+        qDebug() << qry.lastError().text() << endl;
+        return false;
+    }
+
+    return true;
+}
+
+void CarBlock::on_btnRent_clicked()
+{ 
+    emit inProgress();
+
+    bool isChanged = checkStatus(); // check if status changed
+
+    if(!isChanged) {
+        if(carStatus == Status::Free) {
+            NameDialog * nameDialog = new NameDialog(idCar);
+            if(nameDialog->exec() == NameDialog::Accepted) {
+                isChanged = checkStatus(); // check if status changed
+                if(!isChanged) {
+                    QString name,surname;
+                    nameDialog->getNameAndSurname(name,surname);
+                    if(addToHistory(name,surname)){
+                        QMessageBox::information(this,"Informacja","Wypożyczono!");
+                        emit statusChanged();
+                    }
+                    else
+                        QMessageBox::warning(this,"Uwaga","Polecenie nie powiodło się!");
+                }
+            }
+            delete nameDialog;
         }
         else if(carStatus == Status::Rented) {
-            qry.prepare("UPDATE car SET Status=:_Status WHERE idCar=:_id");
-            qry.bindValue(":_id", idCar);
-            qry.bindValue(":_Status", 0);
-            if( !qry.exec() )
-                QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się.");
-            else {
-                QMessageBox::information(this,"Informacja","Oddano!");
-                emit statusChanged();
+            ReturnDialog * returnDialog = new ReturnDialog(idCar);
+            if( returnDialog->exec() == ReturnDialog::Accepted) {
+                isChanged = checkStatus(); // check if status changed
+                if(!isChanged) {
+                    if(updateHistory(returnDialog->getMileage(),returnDialog->getNotes())){
+                        QMessageBox::information(this,"Informacja","Oddano!");
+                        emit statusChanged();
+                    }
+                    else
+                        QMessageBox::warning(this,"Uwaga","Polecenie nie powiodło się!");
+                }
+            delete returnDialog;
             }
         }
     }
     else {
-        QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się.");
+        QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się!");
         emit statusChanged();
     }
 
+    emit progressFinished();
 }

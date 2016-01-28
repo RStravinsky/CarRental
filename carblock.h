@@ -3,12 +3,13 @@
 
 #include <QWidget>
 #include <QDate>
-#include <bookingdialog.h>
 #include <memory>
 #include <QDebug>
 #include <QtSql>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <namedialog.h>
+#include <returndialog.h>
 
 namespace Ui {
 class CarBlock;
@@ -32,15 +33,22 @@ public:
 private slots:
     void on_btnRent_clicked();
 
+public slots:
+
 signals:
     void statusChanged();
+    void inProgress();
+    void progressFinished();
 
 private:
     Ui::CarBlock *ui;
     int idCar;
-    BookingDialog * bookingDialog{nullptr};
     QSqlQueryModel * bookingTable{nullptr};
     void setRentButton(Status status);
+    bool checkStatus();
+    bool addToHistory(QString name, QString surname);
+    bool updateHistory(QString mileage, QString notes);
+    //QString name,surname;
 };
 
 #endif // CARBLOCK_H

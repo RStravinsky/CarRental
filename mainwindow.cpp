@@ -7,18 +7,30 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     login = "root";
-    password = "embedded"; //change password here
+    password = "Serwis4q@"; //change password here
 
     if (connectToDatabase(login, password)) {
         ui->statusBar->showMessage("Połączono z użytkownikiem: " + login);
         updateView();
     }
     else ui->statusBar->showMessage("Nie można połączyć z bazą danych");
+
+    timer = new QTimer(this);
+    //connect(timer,SIGNAL(timeout()),this,SLOT(onTimerOverflow()));
+    timer->start(2000);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+void MainWindow::onTimerOverflow()
+{
+    qDebug() << "Update mainwindow" << endl;
+    const int varticalPosition = ui->scrollArea->verticalScrollBar()->value();
+    updateView();
+    ui->scrollArea->verticalScrollBar()->setValue(varticalPosition);
+    timer->start(2000);
 }
 
 void MainWindow::updateView()
@@ -39,13 +51,15 @@ void MainWindow::updateView()
         carBlockVector.emplace_back(std::move(new CarBlock(carTable->data(carTable->index(i,0)).toInt(),
                                                            carTable->data(carTable->index(i,1)).toString(), carTable->data(carTable->index(i,2)).toString(),
                                                            carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,6)).toInt(),
-                                                           static_cast<CarBlock::Status>(carTable->data(carTable->index(i,8)).toInt()),
-                                                           carTable->data(carTable->index(i,9)).toString()
+                                                           static_cast<CarBlock::Status>(carTable->data(carTable->index(i,7)).toInt()),
+                                                           carTable->data(carTable->index(i,8)).toString()
                                                           )
                                               ));
        lastCarBlock = carBlockVector.back();
        lastCarBlock->setBookingTable(bookingTable);
-       connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()));
+       connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
+       connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
+       connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(2000);});
     }
 
     scrollWidget = new QWidget(ui->scrollArea);
@@ -58,7 +72,7 @@ void MainWindow::updateView()
 bool MainWindow::connectToDatabase(QString &login, QString &password)
 {
     sqlDatabase = QSqlDatabase::addDatabase("QMYSQL");
-    sqlDatabase.setHostName("127.0.0.1"); //server 192.168.1.7
+    sqlDatabase.setHostName("192.168.1.7");
     sqlDatabase.setDatabaseName("sigmacars");
     if(login.isEmpty() && password.isEmpty()) {
         sqlDatabase.setUserName("root");

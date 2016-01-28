@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QtSql/QSqlQueryModel>
+#include <QTimer>
+#include <QScrollBar>
 #include <vector>
 #include "carblock.h"
 
@@ -22,6 +24,9 @@ public:
 public slots:
     void updateView();
 
+private slots:
+    void onTimerOverflow();
+
 private:
     Ui::MainWindow *ui;
     QVBoxLayout *scrollLayout{nullptr};
@@ -32,6 +37,7 @@ private:
     std::vector<CarBlock*> carBlockVector;
     QString login;
     QString password;
+    QTimer * timer{nullptr};
 
     bool connectToDatabase(QString &login, QString &password);
     void closeDatabase();

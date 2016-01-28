@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Rezerwacja samochodów</string>
+   <string>Wypożyczalnia samochodów</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
@@ -155,7 +155,7 @@ color: white</string>
      <x>0</x>
      <y>0</y>
      <width>840</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
