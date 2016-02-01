@@ -26,7 +26,7 @@
    <string>Podaj imię i nazwisko</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset resource="../SigmaCars/resources.qrc">
     <normaloff>:/images/images/person.png</normaloff>:/images/images/person.png</iconset>
   </property>
   <property name="styleSheet">
@@ -209,8 +209,6 @@ background: rgb(255,50,50);
    </property>
   </widget>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

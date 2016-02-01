@@ -1,13 +1,15 @@
 #include "returndialog.h"
 #include "ui_returndialog.h"
 
-ReturnDialog::ReturnDialog(int id,QWidget *parent) :
+ReturnDialog::ReturnDialog(int mileage, int id,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ReturnDialog),
-    idCar(id)
+    idCar(id),
+    previousMileage(mileage)
 {
     ui->setupUi(this);
     connect(ui->pushButtonCancel, SIGNAL(released()), this, SLOT(reject()));
+    ui->lblMileage->setValidator(new QIntValidator());
 }
 
 ReturnDialog::~ReturnDialog()
@@ -29,8 +31,15 @@ void ReturnDialog::on_pushButtonConfirm_clicked()
 {
     QString mileage = ui->lblMileage->text();
 
-    if(mileage.isEmpty())
+    if(mileage.isEmpty()) {
         QMessageBox::information(this,"Informacja","Nie uzupełniono przebiegu.");
+        return;
+    }
 
-    else this->accept();
+    if( ui->lblMileage->text().toInt() < previousMileage){
+        QMessageBox::information(this,"Informacja","Wpisany przebieg jest mniejszy od poprzedniego.");
+        return;
+    }
+
+    this->accept();
 }

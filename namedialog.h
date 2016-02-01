@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QPair>
+#include <QValidator>
+#include <QRegExp>
 
 namespace Ui {
 class NameDialog;

@@ -3,22 +3,11 @@
         <file>images/car.png</file>
         <file>images/free.png</file>
         <file>images/rented.png</file>
-        <file>images/reserved.png</file>
         <file>images/person.png</file>
         <file>images/plate.png</file>
         <file>images/speed.png</file>
-        <file>images/delete.png</file>
-        <file>images/info.png</file>
-        <file>images/add.png</file>
-        <file>images/car_rent.ico</file>
-        <file>images/car_rent.png</file>
         <file>images/icon.ico</file>
-        <file>images/beginTime.png</file>
-        <file>images/endTime.png</file>
-        <file>images/insurance.png</file>
-        <file>images/inspection.png</file>
-        <file>images/savetodb.png</file>
-        <file>images/warnings.png</file>
         <file>images/comments.png</file>
+        <file>images/update.png</file>
     </qresource>
 </RCC>

@@ -187,6 +187,9 @@ background: rgb(0,150,0);
 color: gray;
 background-color:transparent</string>
    </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhDigitsOnly</set>
+   </property>
    <property name="text">
     <string>Nr rejestracyjny</string>
    </property>

@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#define UPDATE_TIME 120000 // 2 minutes
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -10,14 +12,16 @@ MainWindow::MainWindow(QWidget *parent) :
     password = "Serwis4q@"; //change password here
 
     if (connectToDatabase(login, password)) {
-        ui->statusBar->showMessage("Połączono z użytkownikiem: " + login);
+        ui->statusBar->showMessage("Połączono z bazą danych");
         updateView();
     }
     else ui->statusBar->showMessage("Nie można połączyć z bazą danych");
 
+    createUpdateButton();
+
     timer = new QTimer(this);
-    //connect(timer,SIGNAL(timeout()),this,SLOT(onTimerOverflow()));
-    timer->start(2000);
+    connect(timer,SIGNAL(timeout()),this,SLOT(onTimerOverflow()));
+    onTimerOverflow();
 }
 
 MainWindow::~MainWindow()
@@ -26,47 +30,63 @@ MainWindow::~MainWindow()
 }
 void MainWindow::onTimerOverflow()
 {
-    qDebug() << "Update mainwindow" << endl;
-    const int varticalPosition = ui->scrollArea->verticalScrollBar()->value();
     updateView();
-    ui->scrollArea->verticalScrollBar()->setValue(varticalPosition);
-    timer->start(2000);
+    timer->start(UPDATE_TIME);
 }
 
 void MainWindow::updateView()
 {
-    delete carTable;
-    delete bookingTable;
-    delete scrollLayout;
-    delete scrollWidget;
+    qDebug() << "Updating..." << endl;
+    if(connectToDatabase(login,password)) {
 
-    carTable = new QSqlQueryModel(this);
-    carTable->setQuery("SELECT * FROM car;");
-    bookingTable = new QSqlQueryModel(this);
-    bookingTable->setQuery("SELECT * FROM booking;");
-    carBlockVector.clear();
+        ui->statusBar->showMessage("Połączono z bazą danych");
+        const int varticalPosition = ui->scrollArea->verticalScrollBar()->value();
 
-    CarBlock * lastCarBlock{nullptr};
-    for(int i = 0; i < carTable->rowCount(); ++i) {
-        carBlockVector.emplace_back(std::move(new CarBlock(carTable->data(carTable->index(i,0)).toInt(),
-                                                           carTable->data(carTable->index(i,1)).toString(), carTable->data(carTable->index(i,2)).toString(),
-                                                           carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,6)).toInt(),
-                                                           static_cast<CarBlock::Status>(carTable->data(carTable->index(i,7)).toInt()),
-                                                           carTable->data(carTable->index(i,8)).toString()
-                                                          )
-                                              ));
-       lastCarBlock = carBlockVector.back();
-       lastCarBlock->setBookingTable(bookingTable);
-       connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
-       connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
-       connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(2000);});
+        delete carTable;
+        delete bookingTable;
+        delete scrollLayout;
+        delete scrollWidget;
+
+        carTable = new QSqlQueryModel(this);
+        carTable->setQuery("SELECT * FROM car;");
+        bookingTable = new QSqlQueryModel(this);
+        bookingTable->setQuery("SELECT * FROM booking;");
+        carBlockVector.clear();
+
+        CarBlock * lastCarBlock{nullptr};
+        for(int i = 0; i < carTable->rowCount(); ++i) {
+            carBlockVector.emplace_back(std::move(new CarBlock(carTable->data(carTable->index(i,0)).toInt(),
+                                                               carTable->data(carTable->index(i,1)).toString(), carTable->data(carTable->index(i,2)).toString(),
+                                                               carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,6)).toInt(),
+                                                               static_cast<CarBlock::Status>(carTable->data(carTable->index(i,7)).toInt()),
+                                                               carTable->data(carTable->index(i,8)).toString()
+                                                              )
+                                                  ));
+           lastCarBlock = carBlockVector.back();
+           lastCarBlock->setBookingTable(bookingTable);
+           connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
+           connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
+           connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME);});
+           connect(lastCarBlock,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
+        }
+
+        scrollWidget = new QWidget(ui->scrollArea);
+        scrollLayout = new QVBoxLayout(scrollWidget);
+        for(auto pos= carBlockVector.begin();pos!=carBlockVector.end();++pos)
+            scrollLayout->addWidget(*pos);
+        ui->scrollArea->setWidget(scrollWidget);
+
+        ui->scrollArea->verticalScrollBar()->setValue(varticalPosition);
+
+        closeDatabase();
     }
 
-    scrollWidget = new QWidget(ui->scrollArea);
-    scrollLayout = new QVBoxLayout(scrollWidget);
-    for(auto pos= carBlockVector.begin();pos!=carBlockVector.end();++pos)
-        scrollLayout->addWidget(*pos);
-    ui->scrollArea->setWidget(scrollWidget);
+    else {
+        closeDatabase();
+        QMessageBox::critical(this,"BŁĄD", "Utracono połączenie z bazą danych!");
+        ui->statusBar->showMessage("Nie można połączyć z bazą danych");
+    }
+
 }
 
 bool MainWindow::connectToDatabase(QString &login, QString &password)
@@ -88,6 +108,18 @@ bool MainWindow::connectToDatabase(QString &login, QString &password)
 
 void MainWindow::closeDatabase()
 {
+    QString connection;
+    connection = sqlDatabase.connectionName();
     sqlDatabase.close();
-    QSqlDatabase::removeDatabase("sigmacars");
+    sqlDatabase = QSqlDatabase();
+    sqlDatabase.removeDatabase(connection);
+}
+
+void MainWindow::createUpdateButton()
+{
+    QPushButton * updateButton = new QPushButton(this);
+    updateButton->setIcon(QIcon(":/images/images/update.png"));
+    updateButton->setStyleSheet("border:none;");
+    ui->statusBar->addPermanentWidget(updateButton);
+    connect(updateButton, &QPushButton::clicked,[=](){updateView();});
 }

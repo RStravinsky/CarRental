@@ -6,6 +6,7 @@
 #include <QtSql/QSqlQueryModel>
 #include <QTimer>
 #include <QScrollBar>
+#include <QPushButton>
 #include <vector>
 #include "carblock.h"
 
@@ -41,6 +42,8 @@ private:
 
     bool connectToDatabase(QString &login, QString &password);
     void closeDatabase();
+
+    void createUpdateButton();
 };
 
 #endif // MAINWINDOW_H

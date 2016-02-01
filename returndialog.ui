@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Podaj przebieg i uwagi</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/images/plate.png</normaloff>:/images/images/plate.png</iconset>
   </property>
   <widget class="QLabel" name="lblNotesImage">
    <property name="geometry">
@@ -40,6 +44,15 @@
      <width>391</width>
      <height>141</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgba(131, 131, 131, 131);
@@ -113,6 +126,9 @@ background-color:transparent</string>
      <pointsize>12</pointsize>
     </font>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
    <property name="styleSheet">
     <string notr="true">QPushButton:hover {
 border-radius: 5px;
@@ -151,6 +167,9 @@ background: rgb(0,150,0);
      <family>Calibri</family>
      <pointsize>12</pointsize>
     </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton:hover {
