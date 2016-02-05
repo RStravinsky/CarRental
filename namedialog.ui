@@ -26,7 +26,7 @@
    <string>Podaj imię i nazwisko</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../SigmaCars/resources.qrc">
+   <iconset resource="resources.qrc">
     <normaloff>:/images/images/person.png</normaloff>:/images/images/person.png</iconset>
   </property>
   <property name="styleSheet">
@@ -34,23 +34,26 @@
 background-color: white;
 }
 
-QPushButton:hover {
+QMessageBox QPushButton:hover {
 border-radius: 5px;
-background: rgb(210,210,210);
+background: rgb(255,140,0);
 }
 
-QPushButton{
-color: gray;
-border-radius: 5px;
-background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-   stop: 0 rgba(230,230,230), stop: 0.7 rgb(210,210,210));
-}
-
-QPushButton:pressed {
+QMessageBox QPushButton{
 color: white;
 border-radius: 5px;
-background: rgb(230,230,230);
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+   stop: 0 rgba(255,140,0), stop: 0.7 rgb(255,105,0));
+min-height: 30px;
+min-width: 70px;
 }
+
+QMessageBox QPushButton:pressed {
+color: white;
+border-radius: 5px;
+background: rgb(255,105,0);
+}
+
 
 QLabel{
 color: gray;
@@ -209,6 +212,8 @@ background: rgb(255,50,50);
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

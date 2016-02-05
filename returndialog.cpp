@@ -32,12 +32,12 @@ void ReturnDialog::on_pushButtonConfirm_clicked()
     QString mileage = ui->lblMileage->text();
 
     if(mileage.isEmpty()) {
-        QMessageBox::information(this,"Informacja","Nie uzupełniono przebiegu.");
+        QMessageBox::warning(this,"Uwaga!","Nie uzupełniono przebiegu.");
         return;
     }
 
     if( ui->lblMileage->text().toInt() < previousMileage){
-        QMessageBox::information(this,"Informacja","Wpisany przebieg jest mniejszy od poprzedniego.");
+        QMessageBox::warning(this,"Uwaga!","Wpisany przebieg jest mniejszy od poprzedniego.");
         return;
     }
 

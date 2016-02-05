@@ -71,7 +71,7 @@ bool CarBlock::checkStatus()
 
         closeDatabase();
         if(checkedStatus != carStatus) {
-            QMessageBox::warning(this,"Informacja","Polecenie nie powidoło się!");
+            QMessageBox::warning(this,"Uwaga!","Polecenie nie powidoło się!");
             emit statusChanged();
             return true;
         }
@@ -80,7 +80,7 @@ bool CarBlock::checkStatus()
     }
     else {
         closeDatabase();
-        QMessageBox::critical(this,"BŁĄD", "Utracono połączenie z bazą danych!");
+        QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
         return true;
     }
@@ -108,7 +108,7 @@ bool CarBlock::addToHistory(QString name, QString surname)
     }
     else {
         closeDatabase();
-        QMessageBox::critical(this,"BŁĄD", "Utracono połączenie z bazą danych!");
+        QMessageBox::critical(this,"Bład!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
         return false;
     }
@@ -167,7 +167,7 @@ bool CarBlock::updateHistory(QString mileage, QString notes)
     }
     else {
         closeDatabase();
-        QMessageBox::critical(this,"BŁĄD", "Utracono połączenie z bazą danych!");
+        QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
         return false;
     }
@@ -208,7 +208,7 @@ void CarBlock::on_btnRent_clicked()
                             emit statusChanged();
                         }
                         else
-                            QMessageBox::warning(this,"Uwaga","Polecenie nie powiodło się!");
+                            QMessageBox::warning(this,"Uwaga!","Polecenie nie powiodło się!");
                     }
                 delete returnDialog;
                 }
@@ -219,7 +219,7 @@ void CarBlock::on_btnRent_clicked()
     }
     else {
         closeDatabase();
-        QMessageBox::critical(this,"BŁĄD", "Utracono połączenie z bazą danych!");
+        QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
     }
 

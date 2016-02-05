@@ -11,13 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     login = "root";
     password = "Serwis4q@"; //change password here
 
-    if (connectToDatabase(login, password)) {
-        ui->statusBar->showMessage("Połączono z bazą danych");
-        updateView();
-    }
-    else ui->statusBar->showMessage("Nie można połączyć z bazą danych");
-
     createUpdateButton();
+    ui->statusBar->setStyleSheet("background: white; color: gray; font-family: Calibri; font-size: 10pt;");
 
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(onTimerOverflow()));
@@ -83,7 +78,7 @@ void MainWindow::updateView()
 
     else {
         closeDatabase();
-        QMessageBox::critical(this,"BŁĄD", "Utracono połączenie z bazą danych!");
+        QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         ui->statusBar->showMessage("Nie można połączyć z bazą danych");
     }
 
@@ -119,6 +114,7 @@ void MainWindow::createUpdateButton()
 {
     QPushButton * updateButton = new QPushButton(this);
     updateButton->setIcon(QIcon(":/images/images/update.png"));
+    updateButton->setToolTip("Aktualizuj");
     updateButton->setStyleSheet("border:none;");
     ui->statusBar->addPermanentWidget(updateButton);
     connect(updateButton, &QPushButton::clicked,[=](){updateView();});

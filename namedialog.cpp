@@ -27,7 +27,7 @@ void NameDialog::on_pushButtonConfirm_released()
     QString surname = ui->lineEditSurname->text();
 
     if(name.isEmpty() || surname.isEmpty())
-        QMessageBox::information(this,"Informacja","Pole tekstowe nie zostało wypełnione.");
+        QMessageBox::warning(this,"Uwaga!","Pole tekstowe nie zostało wypełnione.");
 
     else this->accept();
 }

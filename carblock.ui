@@ -34,7 +34,28 @@
   <property name="styleSheet">
    <string notr="true">QLabel{
 color: gray
-}</string>
+}
+
+QMessageBox QPushButton:hover {
+border-radius: 5px;
+background: rgb(255,140,0);
+}
+
+QMessageBox QPushButton{
+color: white;
+border-radius: 5px;
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+   stop: 0 rgba(255,140,0), stop: 0.7 rgb(255,105,0));
+min-height: 30px;
+min-width: 70px;
+}
+
+QMessageBox QPushButton:pressed {
+color: white;
+border-radius: 5px;
+background: rgb(255,105,0);
+}
+</string>
   </property>
   <widget class="QLabel" name="lblPhoto">
    <property name="geometry">
@@ -119,6 +140,9 @@ background: rgb(0,150,0);
      <height>61</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Status samochodu</string>
+   </property>
    <property name="text">
     <string/>
    </property>
@@ -138,6 +162,9 @@ background: rgb(0,150,0);
      <height>31</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Przebieg</string>
+   </property>
    <property name="text">
     <string/>
    </property>
@@ -156,6 +183,9 @@ background: rgb(0,150,0);
      <width>31</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Numer rejestracyjny</string>
    </property>
    <property name="text">
     <string/>
