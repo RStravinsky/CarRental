@@ -31,7 +31,7 @@ void MainWindow::onTimerOverflow()
 
 void MainWindow::updateView()
 {
-    qDebug() << "Updating..." << endl;
+    //qDebug() << "Updating..." << endl;
     if(connectToDatabase(login,password)) {
 
         ui->statusBar->showMessage("Połączono z bazą danych");
