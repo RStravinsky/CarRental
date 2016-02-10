@@ -8,8 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    login = "root";
-    password = "Serwis4q@"; //change password here
+    login = "rezerwacja";
+    password = "rezerwacja"; //change password here
 
     createUpdateButton();
     ui->statusBar->setStyleSheet("background: white; color: gray; font-family: Calibri; font-size: 10pt;");
@@ -50,19 +50,21 @@ void MainWindow::updateView()
 
         CarBlock * lastCarBlock{nullptr};
         for(int i = 0; i < carTable->rowCount(); ++i) {
-            carBlockVector.emplace_back(std::move(new CarBlock(carTable->data(carTable->index(i,0)).toInt(),
-                                                               carTable->data(carTable->index(i,1)).toString(), carTable->data(carTable->index(i,2)).toString(),
-                                                               carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,6)).toInt(),
-                                                               static_cast<CarBlock::Status>(carTable->data(carTable->index(i,7)).toInt()),
-                                                               carTable->data(carTable->index(i,8)).toString()
-                                                              )
-                                                  ));
-           lastCarBlock = carBlockVector.back();
-           lastCarBlock->setBookingTable(bookingTable);
-           connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
-           connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
-           connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME);});
-           connect(lastCarBlock,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
+            if(carTable->data(carTable->index(i,9)).toBool()) {
+                carBlockVector.emplace_back(std::move(new CarBlock(carTable->data(carTable->index(i,0)).toInt(),
+                                                                   carTable->data(carTable->index(i,1)).toString(), carTable->data(carTable->index(i,2)).toString(),
+                                                                   carTable->data(carTable->index(i,3)).toString(), carTable->data(carTable->index(i,6)).toInt(),
+                                                                   static_cast<CarBlock::Status>(carTable->data(carTable->index(i,7)).toInt()),
+                                                                   carTable->data(carTable->index(i,8)).toString()
+                                                                  )
+                                                      ));
+               lastCarBlock = carBlockVector.back();
+               lastCarBlock->setBookingTable(bookingTable);
+               connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
+               connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
+               connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME);});
+               connect(lastCarBlock,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
+           }
         }
 
         scrollWidget = new QWidget(ui->scrollArea);
@@ -90,8 +92,8 @@ bool MainWindow::connectToDatabase(QString &login, QString &password)
     sqlDatabase.setHostName("192.168.1.7");
     sqlDatabase.setDatabaseName("sigmacars");
     if(login.isEmpty() && password.isEmpty()) {
-        sqlDatabase.setUserName("root");
-        sqlDatabase.setPassword("Serwis4q@");
+        sqlDatabase.setUserName("rezerwacja");
+        sqlDatabase.setPassword("rezerwacja");
     }
     else {
         sqlDatabase.setUserName(login);

@@ -51,6 +51,34 @@ background: rgb(255,105,0);
 }
 
 QDialog{ background: white; }
+
+QScrollBar:vertical {
+  border: none;
+  background: &quot;transparent&quot;;
+  width: 15px;
+  margin: 20px 0px 20px 0px;
+}
+
+QScrollBar::handle:vertical {
+  background: rgb(107,124,140);
+  min-height: 20px;
+  border-radius: 2px;
+}
+
+QScrollBar::add-line:vertical {
+   border: none;
+      background: none;
+width: 0px;
+height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+   border: none;
+      background: none;
+width: 0px;
+height: 0px;
+}
+
 </string>
   </property>
   <widget class="QLabel" name="lblNotesImage">
@@ -118,9 +146,9 @@ color: black;</string>
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>15</y>
+     <y>5</y>
      <width>391</width>
-     <height>21</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
@@ -150,10 +178,10 @@ background-color:transparent</string>
   <widget class="QPushButton" name="pushButtonConfirm">
    <property name="geometry">
     <rect>
-     <x>360</x>
+     <x>345</x>
      <y>210</y>
-     <width>90</width>
-     <height>30</height>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
    <property name="font">
@@ -194,8 +222,8 @@ background: rgb(0,150,0);
     <rect>
      <x>10</x>
      <y>210</y>
-     <width>90</width>
-     <height>30</height>
+     <width>105</width>
+     <height>35</height>
     </rect>
    </property>
    <property name="font">

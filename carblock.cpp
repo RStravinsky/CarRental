@@ -60,7 +60,7 @@ void CarBlock::setRentButton(Status status)
 bool CarBlock::checkStatus()
 {
     closeDatabase();
-    if(connectToDatabase(QString("root"),QString("Serwis4q@"))) {
+    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
         Status checkedStatus = carStatus;
         QSqlQuery qry("SELECT idCar,Status FROM car");
         while(qry.next()) {
@@ -88,7 +88,7 @@ bool CarBlock::checkStatus()
 
 bool CarBlock::addToHistory(QString name, QString surname)
 {
-    if(connectToDatabase(QString("root"),QString("Serwis4q@"))) {
+    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
         QSqlQuery qry;
         qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar) "
                     "VALUES (:_Name, :_Surname, :_Begin, :_idCar);"
@@ -116,7 +116,7 @@ bool CarBlock::addToHistory(QString name, QString surname)
 
 bool CarBlock::updateHistory(QString mileage, QString notes)
 {
-    if(connectToDatabase(QString("root"),QString("Serwis4q@"))) {
+    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
         QSqlQuery qry;
         QString name, surname;
 
@@ -176,7 +176,7 @@ bool CarBlock::updateHistory(QString mileage, QString notes)
 void CarBlock::on_btnRent_clicked()
 {
     emit inProgress();
-    if(connectToDatabase(QString("root"),QString("Serwis4q@"))) {
+    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
 
         bool isChanged = checkStatus(); // check if status changed
 
@@ -232,8 +232,8 @@ bool CarBlock::connectToDatabase(QString login, QString password)
     sqlDatabase.setHostName("192.168.1.7");
     sqlDatabase.setDatabaseName("sigmacars");
     if(login.isEmpty() && password.isEmpty()) {
-        sqlDatabase.setUserName("root");
-        sqlDatabase.setPassword("Serwis4q@");
+        sqlDatabase.setUserName("rezerwacja");
+        sqlDatabase.setPassword("rezerwacja");
     }
     else {
         sqlDatabase.setUserName(login);

@@ -9,5 +9,14 @@
         <file>images/icon.ico</file>
         <file>images/comments.png</file>
         <file>images/update.png</file>
+        <file>images/berlingo_gray.jpg</file>
+        <file>images/berlingo_silver.jpg</file>
+        <file>images/charger.png</file>
+        <file>images/corolla.png</file>
+        <file>images/jumper.png</file>
+        <file>images/jumper_white.png</file>
+        <file>images/lancer_graphite.png</file>
+        <file>images/lancer_silver.png</file>
+        <file>images/outlander.png</file>
     </qresource>
 </RCC>
