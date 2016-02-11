@@ -18,7 +18,7 @@ class NameDialog : public QDialog
 public:
     explicit NameDialog(int id, QWidget *parent = 0);
     ~NameDialog();
-    void getNameAndSurname(QString & name, QString & surname);
+    void getNameAndSurname(QString & name, QString & surname, QString &destination);
 
 private slots:
     void on_pushButtonConfirm_released();

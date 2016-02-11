@@ -86,18 +86,19 @@ bool CarBlock::checkStatus()
     }
 }
 
-bool CarBlock::addToHistory(QString name, QString surname)
+bool CarBlock::addToHistory(QString name, QString surname, QString destination)
 {
     if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
         QSqlQuery qry;
-        qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar) "
-                    "VALUES (:_Name, :_Surname, :_Begin, :_idCar);"
+        qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar, Destination) "
+                    "VALUES (:_Name, :_Surname, :_Begin, :_idCar, :_Destination);"
                     "UPDATE car SET Status=:_Status WHERE idCar=:_idCar");
         qry.bindValue(":_Name", name);
         qry.bindValue(":_Surname", surname);
         qry.bindValue(":_Begin", QDateTime::currentDateTime());
         qry.bindValue(":_Status", 1);
         qry.bindValue(":_idCar", idCar);
+        qry.bindValue(":_Destination", destination);
         bool isExecuted = qry.exec();
         closeDatabase();
         if(!isExecuted)
@@ -186,9 +187,9 @@ void CarBlock::on_btnRent_clicked()
                 if(nameDialog->exec() == NameDialog::Accepted) {
                     isChanged = checkStatus(); // check if status changed
                     if(!isChanged) {
-                        QString name,surname;
-                        nameDialog->getNameAndSurname(name,surname);
-                        if(addToHistory(name,surname)){
+                        QString name,surname,destination;
+                        nameDialog->getNameAndSurname(name,surname,destination);
+                        if(addToHistory(name,surname,destination)){
                             //QMessageBox::information(this,"Informacja","Wypożyczono!");
                             emit statusChanged();
                         }

@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>120</height>
+    <height>150</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>320</width>
-    <height>120</height>
+    <height>150</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>320</width>
-    <height>120</height>
+    <height>150</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -133,11 +133,48 @@ color: gray;
     <string>Nazwisko:</string>
    </property>
   </widget>
+  <widget class="QLineEdit" name="lineEditDestination">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>75</y>
+     <width>195</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>80</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Lokalizacja:</string>
+   </property>
+  </widget>
   <widget class="QPushButton" name="pushButtonConfirm">
    <property name="geometry">
     <rect>
-     <x>209</x>
-     <y>80</y>
+     <x>210</x>
+     <y>110</y>
      <width>105</width>
      <height>35</height>
     </rect>
@@ -146,6 +183,7 @@ color: gray;
     <font>
      <family>Calibri</family>
      <pointsize>12</pointsize>
+     <italic>false</italic>
     </font>
    </property>
    <property name="styleSheet">
@@ -175,8 +213,8 @@ background: rgb(0,150,0);
   <widget class="QPushButton" name="pushButtonCancel">
    <property name="geometry">
     <rect>
-     <x>99</x>
-     <y>80</y>
+     <x>100</x>
+     <y>110</y>
      <width>105</width>
      <height>35</height>
     </rect>
