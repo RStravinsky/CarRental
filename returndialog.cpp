@@ -27,6 +27,11 @@ QString ReturnDialog::getNotes()
     return ui->textEdit->toPlainText();
 }
 
+int ReturnDialog::getDistance()
+{
+    return ui->lblMileage->text().toInt() - previousMileage;
+}
+
 void ReturnDialog::on_pushButtonConfirm_clicked()
 {
     QString mileage = ui->lblMileage->text();

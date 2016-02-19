@@ -19,6 +19,7 @@ public:
     ~ReturnDialog();
     QString getMileage();
     QString getNotes();
+    int getDistance();
 
 private slots:
     void on_pushButtonConfirm_clicked();

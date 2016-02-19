@@ -13,6 +13,22 @@ CarBlock::CarBlock(int id, QString name, QString model, QString licensePlate, in
     ui->lblCarName->setText(name + QString(" ") + model);
     ui->lblMileage->setText(QString::number(mileage) + " km");
     setStatus(status);  
+    if(status) {
+        QSqlQueryModel * historyTable = new QSqlQueryModel(this);
+        historyTable->setQuery(QString("SELECT Name, Surname, Destination FROM history WHERE idCar = %1 AND End IS NULL").arg(idCar));
+
+        ui->lblPerson->setText(
+                    historyTable->data(historyTable->index(historyTable->rowCount()-1,0)).toString() + QString(" ") +
+                    historyTable->data(historyTable->index(historyTable->rowCount()-1,1)).toString() + QString(" ") +
+                    historyTable->data(historyTable->index(historyTable->rowCount()-1,2)).toString()
+                    );
+
+        delete historyTable;
+    }
+    else {
+        ui->lblPersonImage->setVisible(false);
+        ui->lblPerson->setVisible(false);
+    }
 }
 
 CarBlock::~CarBlock()
@@ -86,12 +102,12 @@ bool CarBlock::checkStatus()
     }
 }
 
-bool CarBlock::addToHistory(QString name, QString surname, QString destination)
+bool CarBlock::addToHistory(QString name, QString surname, QString destination, QString target)
 {
     if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
         QSqlQuery qry;
-        qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar, Destination) "
-                    "VALUES (:_Name, :_Surname, :_Begin, :_idCar, :_Destination);"
+        qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar, Destination, Target) "
+                    "VALUES (:_Name, :_Surname, :_Begin, :_idCar, :_Destination, :_Target);"
                     "UPDATE car SET Status=:_Status WHERE idCar=:_idCar");
         qry.bindValue(":_Name", name);
         qry.bindValue(":_Surname", surname);
@@ -99,6 +115,7 @@ bool CarBlock::addToHistory(QString name, QString surname, QString destination)
         qry.bindValue(":_Status", 1);
         qry.bindValue(":_idCar", idCar);
         qry.bindValue(":_Destination", destination);
+        qry.bindValue(":_Target", target);
         bool isExecuted = qry.exec();
         closeDatabase();
         if(!isExecuted)
@@ -115,7 +132,7 @@ bool CarBlock::addToHistory(QString name, QString surname, QString destination)
     }
 }
 
-bool CarBlock::updateHistory(QString mileage, QString notes)
+bool CarBlock::updateHistory(QString mileage, QString notes, int distance)
 {
     if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
         QSqlQuery qry;
@@ -131,11 +148,12 @@ bool CarBlock::updateHistory(QString mileage, QString notes)
                 surname = historyTable->data(historyTable->index(i,2)).toString();
 
                 if(notes.isEmpty()) {
-                    qry.prepare("UPDATE history SET End=:_End WHERE idCar=:_idCar AND End IS NULL;"
+                    qry.prepare("UPDATE history SET End=:_End, Distance=:_Distance WHERE idCar=:_idCar AND End IS NULL;"
                                 "UPDATE car SET Mileage=:_Mileage WHERE idCar=:_idCar;"
                                 "UPDATE car SET Status=:_Status WHERE idCar=:_idCar");
                     qry.bindValue(":_idCar", idCar);
                     qry.bindValue(":_End", QDateTime::currentDateTime());
+                    qry.bindValue(":_Distance",distance);
                     qry.bindValue(":_Mileage", mileage.toInt());
                     qry.bindValue(":_Status", 0);
                 }
@@ -187,9 +205,9 @@ void CarBlock::on_btnRent_clicked()
                 if(nameDialog->exec() == NameDialog::Accepted) {
                     isChanged = checkStatus(); // check if status changed
                     if(!isChanged) {
-                        QString name,surname,destination;
-                        nameDialog->getNameAndSurname(name,surname,destination);
-                        if(addToHistory(name,surname,destination)){
+                        QString name,surname,destination,target;
+                        nameDialog->getNameAndSurname(name,surname,destination,target);
+                        if(addToHistory(name,surname,destination,target)){
                             //QMessageBox::information(this,"Informacja","Wypożyczono!");
                             emit statusChanged();
                         }
@@ -204,7 +222,7 @@ void CarBlock::on_btnRent_clicked()
                 if( returnDialog->exec() == ReturnDialog::Accepted) {
                     isChanged = checkStatus(); // check if status changed
                     if(!isChanged) {
-                        if(updateHistory(returnDialog->getMileage(),returnDialog->getNotes())){
+                        if(updateHistory(returnDialog->getMileage(),returnDialog->getNotes(),returnDialog->getDistance())){
                             //QMessageBox::information(this,"Informacja","Oddano!");
                             emit statusChanged();
                         }
@@ -231,7 +249,7 @@ bool CarBlock::connectToDatabase(QString login, QString password)
 {
     sqlDatabase = QSqlDatabase::addDatabase("QMYSQL");
     sqlDatabase.setHostName("192.168.1.7");
-    sqlDatabase.setDatabaseName("sigmacars");
+    sqlDatabase.setDatabaseName("sigmacarstest");
     if(login.isEmpty() && password.isEmpty()) {
         sqlDatabase.setUserName("rezerwacja");
         sqlDatabase.setPassword("rezerwacja");

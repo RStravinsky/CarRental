@@ -50,8 +50,8 @@ private:
 
     void setRentButton(Status status);
     bool checkStatus();
-    bool addToHistory(QString name, QString surname, QString destination);
-    bool updateHistory(QString mileage, QString notes);
+    bool addToHistory(QString name, QString surname, QString destination, QString target);
+    bool updateHistory(QString mileage, QString notes, int distance);
 };
 
 #endif // CARBLOCK_H

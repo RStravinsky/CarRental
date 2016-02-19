@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>212</height>
+    <height>250</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>600</width>
-    <height>200</height>
+    <height>250</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>16777215</height>
+    <height>250</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -80,7 +80,7 @@ background: rgb(255,105,0);
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>190</y>
+     <y>230</y>
      <width>801</width>
      <height>21</height>
     </rect>
@@ -96,7 +96,7 @@ background: rgb(255,105,0);
    <property name="geometry">
     <rect>
      <x>670</x>
-     <y>150</y>
+     <y>185</y>
      <width>121</width>
      <height>41</height>
     </rect>
@@ -280,6 +280,47 @@ background-color:transparent</string>
     <string>Nazwa samochodu</string>
    </property>
    <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblPerson">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>190</y>
+     <width>601</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblPersonImage">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>31</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Wypożyczony przez ...</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="resources.qrc">:/images/images/person.png</pixmap>
+   </property>
+   <property name="scaledContents">
     <bool>true</bool>
    </property>
   </widget>
