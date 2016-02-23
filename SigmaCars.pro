@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SigmaCars
 TEMPLATE = app
 CONFIG += c++11
-RC_ICON = icon.ico
+RC_ICONS = images\icon.ico
 CONFIG += debug
 
 SOURCES += main.cpp\

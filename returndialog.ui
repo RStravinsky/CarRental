@@ -122,6 +122,9 @@ height: 0px;
     <string notr="true">background-color: rgba(131, 131, 131, 131);
 color: black;</string>
    </property>
+   <property name="placeholderText">
+    <string>Pole nieobowiązkowe!</string>
+   </property>
   </widget>
   <widget class="QLabel" name="lblSpeedImage">
    <property name="geometry">

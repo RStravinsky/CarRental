@@ -249,7 +249,7 @@ bool CarBlock::connectToDatabase(QString login, QString password)
 {
     sqlDatabase = QSqlDatabase::addDatabase("QMYSQL");
     sqlDatabase.setHostName("192.168.1.7");
-    sqlDatabase.setDatabaseName("sigmacarstest");
+    sqlDatabase.setDatabaseName("sigmacars");
     if(login.isEmpty() && password.isEmpty()) {
         sqlDatabase.setUserName("rezerwacja");
         sqlDatabase.setPassword("rezerwacja");
