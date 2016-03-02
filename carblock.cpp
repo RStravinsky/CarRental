@@ -75,7 +75,7 @@ void CarBlock::setRentButton(Status status)
 
 bool CarBlock::checkStatus()
 {
-    if(Database::connectToDatabase()) {
+    if(Database::isOpen()) {
         Status checkedStatus = carStatus;
         QSqlQuery qry("SELECT idCar,Status FROM car");
         while(qry.next()) {
@@ -101,7 +101,7 @@ bool CarBlock::checkStatus()
 
 bool CarBlock::addToHistory(QString name, QString surname, QString destination, QString target)
 {
-    if(Database::connectToDatabase()) {
+    if(Database::isOpen()) {
         QSqlQuery qry;
         qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar, Destination, Target) "
                     "VALUES (:_Name, :_Surname, :_Begin, :_idCar, :_Destination, :_Target);"
@@ -127,7 +127,7 @@ bool CarBlock::addToHistory(QString name, QString surname, QString destination, 
 
 bool CarBlock::updateHistory(QString mileage, QString notes, int distance)
 {
-    if(Database::connectToDatabase()) {
+    if(Database::isOpen()) {
 
         QSqlQuery qry;
         QString name, surname;
@@ -207,7 +207,7 @@ bool CarBlock::isReservation(QString &person)
 void CarBlock::on_btnRent_clicked()
 {
     emit inProgress();
-    if(Database::connectToDatabase()) {
+    if(Database::isOpen()) {
 
         bool isChanged = checkStatus(); // check if status changed
 
@@ -216,8 +216,10 @@ void CarBlock::on_btnRent_clicked()
 
                 QString person;
                 if(isReservation(person))
-                    if(!showMsgBeforeReserve(person))
+                    if(!showMsgBeforeReserve(person)){
+                        emit progressFinished();
                         return;
+                    }
 
                 NameDialog * nameDialog = new NameDialog(idCar);
                 if(nameDialog->exec() == NameDialog::Accepted) {

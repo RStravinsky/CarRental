@@ -4,6 +4,36 @@ QSqlDatabase Database::sqlDatabase = QSqlDatabase();
 
 Database::Database(QObject *parent) : QObject(parent){}
 
+bool Database::isOpen()
+{
+    if(isConnectedToNetwork()){
+        //qDebug() << "Network OK!";
+        return sqlDatabase.isOpen();
+    }
+    else{
+        //qDebug() << "Network ERROR!";
+        return false;
+    }
+}
+
+bool Database::isConnectedToNetwork()
+{
+    QEventLoop eventLoop;
+    QNetworkAccessManager manager;
+    connect(&manager,SIGNAL(finished(QNetworkReply*)),&eventLoop,SLOT(quit()));
+    QNetworkRequest request(QUrl(QString("http://google.com/")));
+    QNetworkReply * reply = manager.get(request);
+    eventLoop.exec();
+    bool result = false;
+
+    if(reply->error() == QNetworkReply::NoError) {
+        result = true;
+    }
+
+    delete reply;
+    return result;
+}
+
 bool Database::connectToDatabase()
 {
     if (!sqlDatabase.open()) return false;

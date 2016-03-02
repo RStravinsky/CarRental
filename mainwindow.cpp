@@ -28,21 +28,6 @@ void MainWindow::onTimerOverflow()
     timer->start(UPDATE_TIME);
 }
 
-bool MainWindow::isConnectedToNetwork()
-{
-    QEventLoop eventLoop;
-    QNetworkAccessManager manager;
-    connect(&manager,SIGNAL(finished(QNetworkReply*)),&eventLoop,SLOT(quit()));
-    QNetworkRequest request(QUrl(QString("http://google.com/")));
-    QNetworkReply * reply = manager.get(request);
-    eventLoop.exec();
-
-    if(reply->error() == QNetworkReply::NoError)
-        return true;
-
-    return false;
-}
-
 void MainWindow::createDBConfigButton()
 {
     dbConfigButton = new QPushButton(this);
@@ -65,9 +50,9 @@ void MainWindow::createDBConfigButton()
 
 void MainWindow::updateView()
 {
-    qDebug() << "Updating ...";
-    if(Database::connectToDatabase()) {
-        qDebug() << "isOpen ...";
+    //qDebug() << "Updating ...";
+    if(Database::isOpen()) {
+        //qDebug() << "isOpen ...";
         ui->statusBar->showMessage("Połączono z bazą danych");
         const int varticalPosition = ui->scrollArea->verticalScrollBar()->value();
 
@@ -94,8 +79,10 @@ void MainWindow::updateView()
                                                       ));
                lastCarBlock = carBlockVector.back();
                connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
-               connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
-               connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME);});
+               //connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
+               connect(lastCarBlock,&CarBlock::inProgress,[=](){timer->stop();this->setEnabled(false);});
+
+               connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME); this->setEnabled(true);});
                connect(lastCarBlock,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
            }
         }
@@ -123,7 +110,3 @@ void MainWindow::createUpdateButton()
     connect(updateButton, &QPushButton::clicked,[=](){updateView();});
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-  qDebug() << isConnectedToNetwork();
-}
