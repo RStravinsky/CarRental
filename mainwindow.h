@@ -7,8 +7,14 @@
 #include <QTimer>
 #include <QScrollBar>
 #include <QPushButton>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QUrl>
 #include <vector>
 #include "carblock.h"
+#include "database.h"
+#include "dbconfigdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,22 +34,20 @@ public slots:
 private slots:
     void onTimerOverflow();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QVBoxLayout *scrollLayout{nullptr};
     QWidget *scrollWidget{nullptr};
-    QSqlDatabase sqlDatabase;
     QSqlQueryModel * carTable{nullptr};
     QSqlQueryModel * bookingTable{nullptr};
     std::vector<CarBlock*> carBlockVector;
-    QString login;
-    QString password;
     QTimer * timer{nullptr};
-
-    bool connectToDatabase(QString &login, QString &password);
-    void closeDatabase();
-
+    QPushButton * dbConfigButton{nullptr};
     void createUpdateButton();
+    void createDBConfigButton();
+    bool isConnectedToNetwork();
 };
 
 #endif // MAINWINDOW_H

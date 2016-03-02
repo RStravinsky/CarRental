@@ -8,10 +8,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    login = "rezerwacja";
-    password = "rezerwacja"; //change password here
 
     createUpdateButton();
+    createDBConfigButton();
     ui->statusBar->setStyleSheet("background: white; color: gray; font-family: Calibri; font-size: 10pt;");
 
     timer = new QTimer(this);
@@ -29,11 +28,46 @@ void MainWindow::onTimerOverflow()
     timer->start(UPDATE_TIME);
 }
 
+bool MainWindow::isConnectedToNetwork()
+{
+    QEventLoop eventLoop;
+    QNetworkAccessManager manager;
+    connect(&manager,SIGNAL(finished(QNetworkReply*)),&eventLoop,SLOT(quit()));
+    QNetworkRequest request(QUrl(QString("http://google.com/")));
+    QNetworkReply * reply = manager.get(request);
+    eventLoop.exec();
+
+    if(reply->error() == QNetworkReply::NoError)
+        return true;
+
+    return false;
+}
+
+void MainWindow::createDBConfigButton()
+{
+    dbConfigButton = new QPushButton(this);
+    dbConfigButton->setIcon(QIcon(":/images/images/dbconfig.png"));
+    dbConfigButton->setToolTip("Konfiguracja bazy danych");
+    dbConfigButton->setStyleSheet("border:none; color: gray");
+    ui->statusBar->addPermanentWidget(dbConfigButton);
+    connect(dbConfigButton, &QPushButton::clicked,[=](){
+        QString line{};
+        timer->stop();
+        if(!DBConfigDialog::readFromFile(line))
+            return;
+        DBConfigDialog d(line);
+        connect(&d,SIGNAL(connectedToDB()),this,SLOT(updateView()),Qt::QueuedConnection);
+        connect(&d,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
+        d.exec();
+        timer->start(UPDATE_TIME);
+    });
+}
+
 void MainWindow::updateView()
 {
-    //qDebug() << "Updating..." << endl;
-    if(connectToDatabase(login,password)) {
-
+    qDebug() << "Updating ...";
+    if(Database::connectToDatabase()) {
+        qDebug() << "isOpen ...";
         ui->statusBar->showMessage("Połączono z bazą danych");
         const int varticalPosition = ui->scrollArea->verticalScrollBar()->value();
 
@@ -59,7 +93,6 @@ void MainWindow::updateView()
                                                                   )
                                                       ));
                lastCarBlock = carBlockVector.back();
-               lastCarBlock->setBookingTable(bookingTable);
                connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
                connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
                connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME);});
@@ -72,44 +105,12 @@ void MainWindow::updateView()
         for(auto pos= carBlockVector.begin();pos!=carBlockVector.end();++pos)
             scrollLayout->addWidget(*pos);
         ui->scrollArea->setWidget(scrollWidget);
-
         ui->scrollArea->verticalScrollBar()->setValue(varticalPosition);
-
-        closeDatabase();
     }
-
     else {
-        closeDatabase();
         QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         ui->statusBar->showMessage("Nie można połączyć z bazą danych");
     }
-
-}
-
-bool MainWindow::connectToDatabase(QString &login, QString &password)
-{
-    sqlDatabase = QSqlDatabase::addDatabase("QMYSQL");
-    sqlDatabase.setHostName("192.168.1.7");
-    sqlDatabase.setDatabaseName("sigmacars");
-    if(login.isEmpty() && password.isEmpty()) {
-        sqlDatabase.setUserName("rezerwacja");
-        sqlDatabase.setPassword("rezerwacja");
-    }
-    else {
-        sqlDatabase.setUserName(login);
-        sqlDatabase.setPassword(password);
-    }
-    if (!sqlDatabase.open()) return false;
-    else return true;
-}
-
-void MainWindow::closeDatabase()
-{
-    QString connection;
-    connection = sqlDatabase.connectionName();
-    sqlDatabase.close();
-    sqlDatabase = QSqlDatabase();
-    sqlDatabase.removeDatabase(connection);
 }
 
 void MainWindow::createUpdateButton()
@@ -120,4 +121,9 @@ void MainWindow::createUpdateButton()
     updateButton->setStyleSheet("border:none;");
     ui->statusBar->addPermanentWidget(updateButton);
     connect(updateButton, &QPushButton::clicked,[=](){updateView();});
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+  qDebug() << isConnectedToNetwork();
 }

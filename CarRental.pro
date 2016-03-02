@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,17 +18,22 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     carblock.cpp \
     namedialog.cpp \
-    returndialog.cpp
+    returndialog.cpp \
+    database.cpp \
+    dbconfigdialog.cpp
 
 HEADERS  += mainwindow.h \
     carblock.h \
     namedialog.h \
-    returndialog.h
+    returndialog.h \
+    database.h \
+    dbconfigdialog.h
 
 FORMS    += mainwindow.ui \
     carblock.ui \
     namedialog.ui \
-    returndialog.ui
+    returndialog.ui \
+    dbconfigdialog.ui
 
 RESOURCES += \
     resources.qrc

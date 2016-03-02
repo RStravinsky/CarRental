@@ -18,5 +18,8 @@
         <file>images/lancer_graphite.png</file>
         <file>images/lancer_silver.png</file>
         <file>images/outlander.png</file>
+        <file>images/dbconfig.png</file>
+        <file>images/load.gif</file>
+        <file>images/sand-clock.png</file>
     </qresource>
 </RCC>

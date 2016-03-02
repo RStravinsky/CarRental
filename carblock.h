@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <namedialog.h>
 #include <returndialog.h>
+#include <database.h>
 
 namespace Ui {
 class CarBlock;
@@ -27,7 +28,6 @@ public:
     explicit CarBlock(int id, QString name, QString model, QString licensePlate, int mileage, Status status = CarBlock::Free, QString photoPath = ":/images/images/car.png", QWidget *parent = 0);
     ~CarBlock();
     void setStatus(Status);
-    void setBookingTable(QSqlQueryModel * bookTable) {bookingTable = bookTable;}
 
 private slots:
     void on_btnRent_clicked();
@@ -40,18 +40,14 @@ signals:
 
 private:
     Ui::CarBlock *ui;
-
     int idCar;
     QSqlQueryModel * bookingTable{nullptr};
-    QSqlDatabase sqlDatabase;
-
-    bool connectToDatabase(QString login, QString password);
-    void closeDatabase();
-
     void setRentButton(Status status);
     bool checkStatus();
     bool addToHistory(QString name, QString surname, QString destination, QString target);
     bool updateHistory(QString mileage, QString notes, int distance);
+    bool isReservation(QString &person);
+    bool showMsgBeforeReserve(QString &person);
 };
 
 #endif // CARBLOCK_H

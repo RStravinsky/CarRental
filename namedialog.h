@@ -6,6 +6,8 @@
 #include <QPair>
 #include <QValidator>
 #include <QRegExp>
+#include <QSqlQueryModel>
+#include <QCompleter>
 
 namespace Ui {
 class NameDialog;
@@ -26,6 +28,17 @@ private slots:
 private:
     Ui::NameDialog *ui;
     int idCar;
+
+    QSqlQueryModel * historyTable{nullptr};
+    QStringList nameList;
+    QStringList surnameList;
+    QStringList destinationList;
+    QCompleter * nameCompleter{nullptr};
+    QCompleter * surnameCompleter{nullptr};
+    QCompleter * destinationCompleter{nullptr};
+    void setCompleterLists();
+    void setCompleters();
+    QString scrollBarStylesheet();
 };
 
 #endif // NAMEDIALOG_H

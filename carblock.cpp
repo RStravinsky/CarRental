@@ -75,8 +75,7 @@ void CarBlock::setRentButton(Status status)
 
 bool CarBlock::checkStatus()
 {
-    closeDatabase();
-    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
+    if(Database::connectToDatabase()) {
         Status checkedStatus = carStatus;
         QSqlQuery qry("SELECT idCar,Status FROM car");
         while(qry.next()) {
@@ -85,7 +84,6 @@ bool CarBlock::checkStatus()
             }
         }
 
-        closeDatabase();
         if(checkedStatus != carStatus) {
             QMessageBox::warning(this,"Uwaga!","Polecenie nie powidoło się!");
             emit statusChanged();
@@ -95,7 +93,6 @@ bool CarBlock::checkStatus()
             return false;
     }
     else {
-        closeDatabase();
         QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
         return true;
@@ -104,7 +101,7 @@ bool CarBlock::checkStatus()
 
 bool CarBlock::addToHistory(QString name, QString surname, QString destination, QString target)
 {
-    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
+    if(Database::connectToDatabase()) {
         QSqlQuery qry;
         qry.prepare("INSERT INTO history (Name, Surname, Begin, idCar, Destination, Target) "
                     "VALUES (:_Name, :_Surname, :_Begin, :_idCar, :_Destination, :_Target);"
@@ -116,16 +113,12 @@ bool CarBlock::addToHistory(QString name, QString surname, QString destination, 
         qry.bindValue(":_idCar", idCar);
         qry.bindValue(":_Destination", destination);
         qry.bindValue(":_Target", target);
-        bool isExecuted = qry.exec();
-        closeDatabase();
-        if(!isExecuted)
+        if(!qry.exec())
             return false;
         else
             return true;
-
     }
     else {
-        closeDatabase();
         QMessageBox::critical(this,"Bład!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
         return false;
@@ -134,10 +127,10 @@ bool CarBlock::addToHistory(QString name, QString surname, QString destination, 
 
 bool CarBlock::updateHistory(QString mileage, QString notes, int distance)
 {
-    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
+    if(Database::connectToDatabase()) {
+
         QSqlQuery qry;
         QString name, surname;
-
         QSqlQueryModel * historyTable = new QSqlQueryModel(this);
         historyTable->setQuery("SELECT * FROM history;");
         for(int i=0; i<historyTable->rowCount(); ++i){
@@ -174,10 +167,7 @@ bool CarBlock::updateHistory(QString mileage, QString notes, int distance)
                 qry.bindValue(":_Mileage", mileage.toInt());
                 qry.bindValue(":_Status", 0);
                 }
-
-                bool isExecuted = qry.exec();
-                closeDatabase();
-                if(!isExecuted)
+                if(!qry.exec())
                     return false;
                 else
                     return true;
@@ -185,22 +175,50 @@ bool CarBlock::updateHistory(QString mileage, QString notes, int distance)
         }
     }
     else {
-        closeDatabase();
         QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
         return false;
     }
 }
 
+bool CarBlock::isReservation(QString &person)
+{
+    QSqlQueryModel * bookingTable = new QSqlQueryModel(this);
+    bookingTable->setQuery(QString("SELECT Name,Surname, Begin, End FROM booking WHERE idCar = %1").arg(idCar));
+
+    for(int i=0;i<bookingTable->rowCount();++i)
+    {
+        if((QDateTime::currentDateTime()>= bookingTable->data(bookingTable->index(i,2)).toDateTime() &&
+           QDateTime::currentDateTime()<= bookingTable->data(bookingTable->index(i,3)).toDateTime()) ||
+           (QDateTime::currentDateTime().addSecs(900) >= bookingTable->data(bookingTable->index(i,2)).toDateTime() &&
+           QDateTime::currentDateTime()<= bookingTable->data(bookingTable->index(i,3)).toDateTime()))
+        {
+            person = bookingTable->data(bookingTable->index(i,0)).toString() + " " +
+                     bookingTable->data(bookingTable->index(i,1)).toString();
+            delete bookingTable;
+            return true;
+        }
+    }
+
+    delete bookingTable;
+    return false;
+}
+
 void CarBlock::on_btnRent_clicked()
 {
     emit inProgress();
-    if(connectToDatabase(QString("rezerwacja"),QString("rezerwacja"))) {
+    if(Database::connectToDatabase()) {
 
         bool isChanged = checkStatus(); // check if status changed
 
         if(!isChanged) {
             if(carStatus == Status::Free) {
+
+                QString person;
+                if(isReservation(person))
+                    if(!showMsgBeforeReserve(person))
+                        return;
+
                 NameDialog * nameDialog = new NameDialog(idCar);
                 if(nameDialog->exec() == NameDialog::Accepted) {
                     isChanged = checkStatus(); // check if status changed
@@ -233,11 +251,8 @@ void CarBlock::on_btnRent_clicked()
                 }
             }
         }
-
-        closeDatabase();
     }
     else {
-        closeDatabase();
         QMessageBox::critical(this,"Błąd!", "Utracono połączenie z bazą danych!");
         emit changeStatusBar("Nie można połączyć z bazą danych");
     }
@@ -245,29 +260,39 @@ void CarBlock::on_btnRent_clicked()
     emit progressFinished();
 }
 
-bool CarBlock::connectToDatabase(QString login, QString password)
+bool CarBlock::showMsgBeforeReserve(QString &person)
 {
-    sqlDatabase = QSqlDatabase::addDatabase("QMYSQL");
-    sqlDatabase.setHostName("192.168.1.7");
-    sqlDatabase.setDatabaseName("sigmacars");
-    if(login.isEmpty() && password.isEmpty()) {
-        sqlDatabase.setUserName("rezerwacja");
-        sqlDatabase.setPassword("rezerwacja");
-    }
-    else {
-        sqlDatabase.setUserName(login);
-        sqlDatabase.setPassword(password);
-    }
-    if (!sqlDatabase.open()) return false;
-    else return true;
-}
+    QMessageBox msgBox(QMessageBox::Question, QString("Uwaga!"), QString("<font face=""Calibri"" size=""3"" color=""gray"">Samochód jest zarezerwowany przez: "+person+". Czy na pewno chcesz wypożyczyć?</font>"), QMessageBox::Yes | QMessageBox::No );
 
-void CarBlock::closeDatabase()
-{
-    QString connection;
-    connection = sqlDatabase.connectionName();
-    sqlDatabase.close();
-    sqlDatabase = QSqlDatabase();
-    sqlDatabase.removeDatabase(connection);
+    msgBox.setStyleSheet("QMessageBox {background: white;}"
+                         "QPushButton:hover {"
+                         "border-radius: 5px;"
+                         "background: rgb(255,140,0);"
+                         "}"
+                         "QPushButton{"
+                         "color: white;"
+                         "border-radius: 5px;"
+                         "background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+                         "stop: 0 rgba(255,140,0), stop: 0.7 rgb(255,105,0));"
+                         "min-width: 70px;"
+                         "min-height: 30px;"
+                         "font-family: Calibri;"
+                         "font-size: 12;"
+                         "font-weight: bold;"
+                         "}"
+                         "QPushButton:pressed {"
+                         "color: white;"
+                         "border-radius: 5px;"
+                         "background: rgb(255,105,0);"
+                         "}"
+                         );
+
+    msgBox.setWindowIcon(QIcon(":/images/images/icon.ico"));
+    msgBox.setButtonText(QMessageBox::Yes, tr("Tak"));
+    msgBox.setButtonText(QMessageBox::No, tr("Nie"));
+    if (msgBox.exec() == QMessageBox::No)
+        return false;
+
+    return true;
 }
 
