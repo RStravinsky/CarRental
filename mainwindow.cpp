@@ -36,15 +36,20 @@ void MainWindow::createDBConfigButton()
     dbConfigButton->setStyleSheet("border:none; color: gray");
     ui->statusBar->addPermanentWidget(dbConfigButton);
     connect(dbConfigButton, &QPushButton::clicked,[=](){
-        QString line{};
+        this->setEnabled(false);
         timer->stop();
-        if(!DBConfigDialog::readFromFile(line))
+        QString line{};
+        if(!DBConfigDialog::readFromFile(line)) {
+            timer->start(UPDATE_TIME);
+            this->setEnabled(true);
             return;
+        }
         DBConfigDialog d(line);
         connect(&d,SIGNAL(connectedToDB()),this,SLOT(updateView()),Qt::QueuedConnection);
         connect(&d,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
         d.exec();
         timer->start(UPDATE_TIME);
+        this->setEnabled(true);
     });
 }
 
@@ -53,7 +58,7 @@ void MainWindow::updateView()
     //qDebug() << "Updating ...";
     if(Database::isOpen()) {
         //qDebug() << "isOpen ...";
-        ui->statusBar->showMessage("Połączono z bazą danych");
+        ui->statusBar->showMessage("Połączono z bazą danych: " + Database::returnHostname());
         const int varticalPosition = ui->scrollArea->verticalScrollBar()->value();
 
         delete carTable;
@@ -79,9 +84,7 @@ void MainWindow::updateView()
                                                       ));
                lastCarBlock = carBlockVector.back();
                connect(lastCarBlock,SIGNAL(statusChanged()),this,SLOT(updateView()),Qt::QueuedConnection);
-               //connect(lastCarBlock,SIGNAL(inProgress()),timer,SLOT(stop()),Qt::DirectConnection);
                connect(lastCarBlock,&CarBlock::inProgress,[=](){timer->stop();this->setEnabled(false);});
-
                connect(lastCarBlock,&CarBlock::progressFinished,[=](){timer->start(UPDATE_TIME); this->setEnabled(true);});
                connect(lastCarBlock,SIGNAL(changeStatusBar(QString,int)),ui->statusBar,SLOT(showMessage(QString,int)));
            }

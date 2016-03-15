@@ -41,17 +41,15 @@ void DBConfigDialog::on_runButton_clicked()
                             "sigmacars", ui->leUser->text(),
                             ui->lePassword->text());
 
-    if(!writeToFile(ui->leAddress->text(), ui->lePort->text().toInt(),
-                   "sigmacars", ui->leUser->text(),ui->lePassword->text()))
-        return;
-
-
     if(Database::connectToDatabase()) {
         QMessageBox::information(this,"Informacja", "Pomyślnie połączono z bazą danych.");
         emit connectedToDB();
         ui->lblWait->setVisible(false);
         ui->lblLoad->setVisible(false);
         this->setEnabled(true);
+        if(!writeToFile(ui->leAddress->text(), ui->lePort->text().toInt(),
+                       "sigmacars", ui->leUser->text(),ui->lePassword->text()))
+            return;
         this->accept();
     }
     else {
@@ -66,13 +64,19 @@ void DBConfigDialog::on_runButton_clicked()
 
 bool DBConfigDialog::writeToFile(const QString &hostname, int port, const QString &database, const QString &user, const QString &password)
 {
-    QFile initFile( QDir::currentPath()+"/init.txt" );
+    QFile initFile( QDir::currentPath()+"/init.bin" );
     if(!initFile.open(QIODevice::WriteOnly)) {
         QMessageBox::critical(this,"Błąd!", "Nie można otworzyć pliku z konfiguracją bazy danych.");
+
+        //unlock
+        ui->lblWait->setVisible(false);
+        ui->lblLoad->setVisible(false);
+        this->setEnabled(true);
+
         return false;
     }
-    QTextStream out( &initFile );
-    out << hostname << ";" << QString::number(port) << ";" << database << ";" << user << ";" << password;
+    QDataStream out( &initFile );
+    out << hostname << QString::number(port) << database << user << password;
     initFile.close();
 
     return true;
@@ -82,6 +86,12 @@ bool DBConfigDialog::dataIsEmpty()
 {
     if(ui->leUser->text().isEmpty() | ui->lePassword->text().isEmpty() || ui->leAddress->text().isEmpty() || ui->lePort->text().isEmpty()) {
         QMessageBox::warning(this,"Uwaga!","Pole tekstowe nie zostało wypełnione.");
+
+        //unlock
+        ui->lblWait->setVisible(false);
+        ui->lblLoad->setVisible(false);
+        this->setEnabled(true);
+
         return true;
     }
 
@@ -90,7 +100,7 @@ bool DBConfigDialog::dataIsEmpty()
 
 bool DBConfigDialog::readFromFile(QString &line)
 {
-    QFile initFile(QDir::currentPath()+"/init.txt");
+    QFile initFile(QDir::currentPath()+"/init.bin");
     if (!initFile.open(QIODevice::ReadOnly)) {
         QMessageBox msgBox(QMessageBox::Critical, QString("Błąd!"), QString("<font face=""Calibri"" size=""3"" color=""gray"">Nie można otworzyć pliku konfiguracji bazy danych.</font>"));
         msgBox.setStyleSheet("QMessageBox {background: white;}"
@@ -119,10 +129,13 @@ bool DBConfigDialog::readFromFile(QString &line)
         msgBox.setWindowIcon(QIcon(":/images/images/icon.ico"));
         msgBox.exec();
         return false;
-    }
-    QTextStream in(&initFile);
-    line = in.readLine();
+    }    
+    QDataStream in(&initFile);
+    QString host,port,name,user,password;
+    in >> host >> port >> name >> user >> password;
+    line = host + ";" + port + ";" +  name + ";" + user + ";" + password;
     initFile.close();
+
 
     return true;
 }
